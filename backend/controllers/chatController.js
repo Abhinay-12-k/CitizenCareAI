@@ -11,8 +11,9 @@ const axios = require('axios');
  */
 
 const handleChat = async (req, res) => {
-  const { message, history } = req.body;
+  const { message, history, language } = req.body;
   const user = req.user;
+  const isTeluguMode = language === 'te';
 
   try {
     if (!process.env.GROQ_API_KEY) {
@@ -141,6 +142,10 @@ const handleChat = async (req, res) => {
     }
 
     // 3. RESPONSE GENERATION LAYER
+    const langInstruction = isTeluguMode
+      ? `\n\nIMPORTANT: The user has selected Telugu language mode. You MUST reply ENTIRELY in Telugu (తెలుగులో సమాధానం ఇవ్వండి). Use Telugu script for ALL your responses. Proper formal Telugu only.`
+      : '';
+
     const finalSystemPrompt = `You are the "Central Intelligence Assistant" of CitizenCare.
     You HAVE direct database access. 
     
@@ -155,6 +160,7 @@ const handleChat = async (req, res) => {
     3. If no specific data is found, state it clearly: "There are currently NO complaints registered that match that specific criteria."
     4. NEVER say "I don't have information" if the data above provides it.
     5. Be professional and authoritative.
+    ${langInstruction}
 
     User Persona: ${user ? user.name : 'User'}`;
 

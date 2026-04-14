@@ -31,6 +31,7 @@ const officerRoutes = require('./routes/officerRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const visionRoutes = require('./routes/visionRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const ttsRoutes = require('./routes/ttsRoutes');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -41,11 +42,24 @@ app.use('/api/staffs', officerRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/vision', visionRoutes);
 app.use('/api/report', reportRoutes);
+app.use('/api/tts', ttsRoutes);
 
-// Fix "Cannot GET /" and add Health Check
-app.get("/", (req, res) => {
-  res.status(200).json({ status: "success", message: "🚀 Multilingual AI REPORT Backend is live" });
-});
+// Serve Frontend in Production
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, '../frontend/dist');
+  app.use(express.static(frontendPath));
+
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.resolve(frontendPath, 'index.html'));
+    }
+  });
+} else {
+  // Fix "Cannot GET /" and add Health Check
+  app.get("/", (req, res) => {
+    res.status(200).json({ status: "success", message: "🚀 Multilingual AI REPORT Backend is live" });
+  });
+}
 
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
