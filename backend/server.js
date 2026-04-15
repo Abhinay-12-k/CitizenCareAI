@@ -50,10 +50,8 @@ if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.join(__dirname, '../frontend/dist');
   app.use(express.static(frontendPath));
 
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.resolve(frontendPath, 'index.html'));
-    }
+  app.get(/^(?!\/api).+/, (req, res) => {
+    res.sendFile(path.resolve(frontendPath, 'index.html'));
   });
 } else {
   // Fix "Cannot GET /" and add Health Check
